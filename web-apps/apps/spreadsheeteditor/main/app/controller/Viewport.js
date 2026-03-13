@@ -142,6 +142,12 @@ define([
             var $filemenu = $('.toolbar-fullview-panel');
             $filemenu.css('top', Common.UI.LayoutManager.isElementVisible('toolbar') ? _intvars.get('toolbar-height-tabs') : 0);
 
+            if (config.customization && config.customization.previewHideChrome) {
+                me.viewport.applyPreviewChromeLayout();
+                $filemenu.css('top', 0);
+                return;
+            }
+
             if ( !config.isEdit ||
                     ( !Common.localStorage.itemExists("sse-compact-toolbar") &&
                         config.customization && config.customization.compactToolbar ))
@@ -361,6 +367,12 @@ define([
             if (Common.UI.Themes.available()) {
                 var _intvars = Common.Utils.InternalSettings,
                     config = this.appConfig;
+
+                if (config && config.customization && config.customization.previewHideChrome) {
+                    this.viewport.applyPreviewChromeLayout();
+                    Common.NotificationCenter.trigger('layout:changed', 'toolbar');
+                    return;
+                }
 
                 const computed_style = window.getComputedStyle(document.body);
 

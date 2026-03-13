@@ -180,6 +180,32 @@ define([
             return resizeOptions;
         },
 
+        isPreviewChromeHidden: function(mode) {
+            return !!(mode && mode.customization && mode.customization.previewHideChrome);
+        },
+
+        applyPreviewChromeLayout: function() {
+            if (!this.vlayout || !this.hlayout) return;
+
+            var title = this.vlayout.getItem('title');
+            if (title) {
+                title.height = 0;
+                title.el.empty().hide();
+            }
+
+            var toolbar = this.vlayout.getItem('toolbar');
+            if (toolbar) {
+                toolbar.height = 0;
+                toolbar.el.removeClass('top-title').hide();
+            }
+
+            var left = this.hlayout.getItem('left');
+            if (left) {
+                left.el.css('width', 0).hide();
+                left.resize && left.resize.el && left.resize.el.hide();
+            }
+        },
+
         applyEditorMode: function() {
             var me              = this,
                 rightMenuView   = SSE.getController('RightMenu').getView('RightMenu');
@@ -191,6 +217,11 @@ define([
         },
 
         applyCommonMode: function() {
+            if (this.isPreviewChromeHidden(this.mode)) {
+                this.applyPreviewChromeLayout();
+                return;
+            }
+
             var value = Common.UI.LayoutManager.getInitValue('leftMenu');
             value = (value!==undefined) ? !value : false;
             Common.localStorage.getBool("sse-hidden-leftmenu", value) && SSE.getController('LeftMenu').getView('LeftMenu').hide();
@@ -206,7 +237,9 @@ define([
                 /** coauthoring end **/
             } else {
                 this.mode = mode;
-                if (this.vlayout && mode.isDesktopApp && !mode.isEdit)
+                if (this.isPreviewChromeHidden(mode)) {
+                    this.applyPreviewChromeLayout();
+                } else if (this.vlayout && mode.isDesktopApp && !mode.isEdit)
                     this.vlayout.items[1].el.css('display', 'block');
             }
         }
